@@ -1,0 +1,123 @@
+<!--<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pizarra distribuida</title>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/socket.io.min.js"></script>
+    <script src="https://drawio.github.io/embed.js"></script>
+    <script>
+        const socket = io('/draw');
+        const drawio = new Drawio({
+            container: '#drawio-container',
+            initialXml: '',
+        });
+        socket.on('draw', (data) => {
+            drawio.loadXml(data);
+        });
+        drawio.on('xml', (xml) => {
+            socket.emit('draw', xml);
+        });
+    </script>
+</head>
+<body>
+    <div id="drawio-container" style="width:100%; height:100vh;"></div>
+</body>
+</html>-->
+
+
+<!--<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Pizarra distribuida</title>
+<script src="https://cdn.jsdelivr.net/npm/socket.io-
+client@4/socket.io.min.js"></script>
+<script src="https://drawio.github.io/embed.js"></script>
+<script>
+const socket = io('/draw');
+const drawio = new Drawio({
+container: '#drawio-container',
+initialXml: '',
+});
+socket.on('draw', (data) => {
+drawio.loadXml(data);
+});
+drawio.on('xml', (xml) => {
+socket.emit('draw', xml);
+});
+</script>
+</head>
+<body>
+<div id="drawio-container"></div>
+</body>
+</html>-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pizarra distribuida</title>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/socket.io.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #canvas {
+            border: 1px solid black;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <script>
+        const socket = io('/draw');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        let drawing = false;
+
+        canvas.addEventListener('mousedown', () => {
+            drawing = true;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            drawing = false;
+            context.beginPath();
+        });
+
+        canvas.addEventListener('mousemove', draw);
+
+        function draw(event) {
+            if (!drawing) return;
+
+            context.lineWidth = 5;
+            context.lineCap = 'round';
+            context.strokeStyle = 'black';
+
+            context.lineTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(event.clientX - canvas.offsetLeft, event.clientY - canvas.offsetTop);
+
+            socket.emit('draw', {
+                x: event.clientX - canvas.offsetLeft,
+                y: event.clientY - canvas.offsetTop
+            });
+        }
+
+        socket.on('draw', (data) => {
+            context.lineWidth = 5;
+            context.lineCap = 'round';
+            context.strokeStyle = 'black';
+
+            context.lineTo(data.x, data.y);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(data.x, data.y);
+        });
+    </script>
+</body>
+</html>
